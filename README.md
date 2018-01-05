@@ -10,7 +10,7 @@ Checkout this repo, install dependencies, then start the gulp process with the f
 
 ```
 > git clone https://github.com/cannyedge34/react-burger-app.git
-> cd react-seminar-merida-kids
+> cd react-burger-app
 > npm install
 > npm start
 ```
