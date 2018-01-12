@@ -17,4 +17,4 @@ Checkout this repo, install dependencies, then start the gulp process with the f
 
 #### Demo
 
-https://cannyedge34.github.io/react-burger-app/
+https://cannyedge34.github.io/react-burger-app
