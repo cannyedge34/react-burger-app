@@ -8,6 +8,7 @@ import axios from '../../../axios-orders';
 import Spinner from '../../../components/UI/Spinner/Spinner';
 import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
 import * as orderActions from '../../../store/actions/index';
+import { updateObject, checkValidity } from '../../../shared/utility';
 
 class ContactData extends Component {
   state = {
@@ -106,9 +107,10 @@ class ContactData extends Component {
     const order = {
       ingredients: this.props.ings,
       price: this.props.price,
-      orderData: formData
+      orderData: formData,
+      userId: this.props.userId
     };
-    this.props.onOrderBurger(order);
+    this.props.onOrderBurger(order, this.props.token);
     // const req = async () => {
     //   try {
     //     //error check await axios.post('/orders', order);
@@ -123,19 +125,19 @@ class ContactData extends Component {
   };
 
   inputChangedHandler = (e, inputIdentifier) => {
-    const updatedOrderForm = {
-      ...this.state.orderForm
-    };
-    const updatedFormEl = {
-      ...updatedOrderForm[inputIdentifier]
-    };
-    updatedFormEl.value = e.target.value;
-    updatedFormEl.valid = this.checkValidity(
-      updatedFormEl.value,
-      updatedFormEl.validation
-    );
-    updatedFormEl.touched = true;
-    updatedOrderForm[inputIdentifier] = updatedFormEl;
+    const updatedFormEl = updateObject(this.state.orderForm[inputIdentifier], {
+      value: e.target.value,
+      valid: checkValidity(
+        e.target.value,
+        this.state.orderForm[inputIdentifier].validation
+      ),
+      touched: true
+    });
+
+    const updatedOrderForm = updateObject(this.state.orderForm, {
+      [inputIdentifier]: updatedFormEl
+    });
+
     let formIsValid = true;
     for (let inputIdentifier in updatedOrderForm) {
       formIsValid = updatedOrderForm[inputIdentifier].valid && formIsValid;
@@ -145,23 +147,6 @@ class ContactData extends Component {
       formIsValid
     });
   };
-
-  checkValidity(value, rules) {
-    let isValid = true;
-    if (!rules) {
-      return true;
-    }
-    if (rules.required) {
-      isValid = value.trim() !== '' && isValid;
-    }
-    if (rules.minLength) {
-      isValid = value.length >= rules.minLength && isValid;
-    }
-    if (rules.maxLength) {
-      isValid = value.length <= rules.maxLength && isValid;
-    }
-    return isValid;
-  }
 
   render() {
     const formElementsArray = [];
@@ -206,13 +191,16 @@ const mapStateToProps = state => {
   return {
     ings: state.burgerBuilder.ingredients,
     price: state.burgerBuilder.totalPrice,
-    loading: state.order.loading
+    loading: state.order.loading,
+    token: state.auth.token,
+    userId: state.auth.userId
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onOrderBurger: orderData => dispatch(orderActions.purchaseBurger(orderData))
+    onOrderBurger: (orderData, token) =>
+      dispatch(orderActions.purchaseBurger(orderData, token))
   };
 };
 
